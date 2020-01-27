@@ -1,5 +1,3 @@
 ## P5 Experiments
 
-Let's see what we can do with this nice library :)
-
-Also, let's learn javascript (good luck me)
+Noob at js but trying to make things with p5 anyway
