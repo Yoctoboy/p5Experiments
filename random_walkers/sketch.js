@@ -6,7 +6,6 @@
  */
 
 
-const noise_module = noise;
 let all_branches = [];
 
 
