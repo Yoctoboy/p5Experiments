@@ -4,6 +4,8 @@ const max_steps = 10000;
 
 
 export function draw_bottom_branches() {
+    blendMode(BLEND);
+
     // ensure the generated pattern is different on each page refresh
     // GOOD SEEDS: (65460 334034); (591106 491244); (840189 251902); (307286 533252)
     const perlin_seed = Math.floor(random(0, 900000));
@@ -11,8 +13,8 @@ export function draw_bottom_branches() {
     noise_module.seed(perlin_seed);
     const random_seed = Math.floor(random(0, 900000));
     // const random_seed = 754521;
-    randomSeed(random_seed)
-    console.log(perlin_seed, random_seed)
+    randomSeed(random_seed);
+    console.log("Seeds for branches: " + perlin_seed + " & " + random_seed);
 
     let x = - width / 20;
     let y = height;
@@ -82,13 +84,4 @@ function create_branches(amount, x, y, min_speedx, max_speedx, min_speedy, max_s
         branches.push(new Branch(x, y, min_speedx, max_speedx, min_speedy, max_speedy));
     }
     return branches;
-}
-
-function draw() {
-    all_branches.forEach(branch => {
-        branch.move();
-        branch.draw();
-        branch.update_visible();
-        step += 1;
-    })
 }
