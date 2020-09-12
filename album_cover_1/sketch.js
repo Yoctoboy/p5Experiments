@@ -1,11 +1,3 @@
-/*
- * Greatly inspired by u/Mamboleoo's post on r/generative subreddit:
- * https://www.reddit.com/r/generative/comments/erl01u/how_to_generate_a_random_walkers_pattern/
- * This code also uses josephg/noisejs library for perlin and simplex noises:
- * https://github.com/josephg/noisejs
- */
-
-
 let all_branches = [];
 let branches_amount = 1000;
 const max_steps = 10000;
@@ -17,8 +9,17 @@ function setup() {
   background(0);
   colorMode(RGB);
 
+  draw_bottom_branches();
+
+  stroke(255);
+  strokeWeight(1);
+  blendMode(BLEND);
+}
+
+
+function draw_bottom_branches() {
   // ensure the generated pattern is different on each page refresh
-  // GOOD SEEDS: (65460 334034); (591106 491244); (840189 251902)
+  // GOOD SEEDS: (65460 334034); (591106 491244); (840189 251902); (307286 533252)
   const perlin_seed = Math.floor(random(0, 900000));
   // const perlin_seed = 787043;
   noise_module.seed(perlin_seed);
@@ -35,11 +36,8 @@ function setup() {
   let max_speedx = 5;
   branches = create_branches(branches_amount, x, y, min_speedx, max_speedx, min_speedy, max_speedy);
   draw_branches(branches);
-
-  stroke(255);
-  strokeWeight(1);
-  blendMode(BLEND);
 }
+
 
 function draw_branches(branches) {
   for (let step = 0; step < max_steps; step++) {
@@ -51,10 +49,10 @@ function draw_branches(branches) {
   }
 }
 
+
 // higher factor makes the branches faster and makes them stay more grouped
 // recommended range: [0.1, 10]
 const noise_speed_factor = 0.25;
-
 
 class Branch {
   constructor(x, y, min_speedx, max_speedx, min_speedy, max_speedy) {
