@@ -8,7 +8,7 @@ function getRandomFloat(min, max) {
 
 var canvas_width = 2000;
 var canvas_height = 2000;
-var density_factor = 0.001; // the lower, the higher the 'zoom' on the perlin noise map
+var density_factor = 0.0015; // the lower, the higher the 'zoom' on the perlin noise map
 // var noise_seed = 1;  // set seed
 var noise_seed = Math.floor(getRandomFloat(0, 1000000));  // random random seed
 console.log("noise_seed =", noise_seed);

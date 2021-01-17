@@ -6,16 +6,16 @@ function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-var canvas_width = 2000;
-var canvas_height = 2000;
-var density_factor = 0.007; // the lower, the higher the 'zoom' on the perlin noise map
-// var noise_seed = 1;  // set seed
+var canvas_width = 1200;
+var canvas_height = 1200;
+var density_factor = 0.0007; // the lower, the higher the 'zoom' on the perlin noise map
+// var noise_seed = 245755;  // set seed
 var noise_seed = Math.floor(getRandomFloat(0, 1000000));  // random random seed
 console.log("noise_seed =", noise_seed);
 noise_module.seed(noise_seed);
 
 // Define static width and length of each rectangle
-const rectangle_width = 24;
+const rectangle_width = 50;
 const rectangle_height = 4;
 let rectangle_color, background_color;
 
@@ -23,7 +23,7 @@ let rectangle_color, background_color;
 function setup() {
   let start_time = Date.now();
   // rectangle_color = color(80, 0, 80);
-  rectangle_color = color(180, 0, 150, 80);
+  rectangle_color = color(0, 200, 200, 80);
   // background_color = color(180, 255, 255);
   background_color = color(0, 0, 0);
   createCanvas(canvas_width, canvas_height);
@@ -39,7 +39,7 @@ function setup() {
   for (var i = -rectangle_width; i < canvas_width; i += 1) {
     for (var j = -rectangle_height; j < canvas_height; j += 1) {
       noise_value = (noise_module.perlin2(density_factor * i, density_factor * j) + 1) / 2; // between 0 and 1
-      adjusted_noise_value = Math.pow(noise_value, 11) * 500;
+      adjusted_noise_value = Math.pow(noise_value, 10) * 100;
       if (getRandomFloat(0, 1) < adjusted_noise_value) {
         draw_random_square(i, j);
         rectangles_drawn += 1;
