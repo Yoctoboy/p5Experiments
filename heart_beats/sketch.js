@@ -1,11 +1,11 @@
-let canvas_width = 1000;
-let canvas_height = 1000;
-let branches_amount = 10;
+let canvas_width = 2000;
+let canvas_height = 2000;
+let branches_amount = 2000;
 
-let min_alpha_position = 600;
+let min_alpha_position = 350;
 let max_alpha_position = 1000;
 let min_alpha_value = 1;
-let max_alpha_value = 255;
+let max_alpha_value = 105;
 
 
 function setup() {
@@ -20,20 +20,19 @@ function setup() {
   // setup code here
   branches_ystarts = new Array(branches_amount).fill(0).map(_ => canvas_height - randomExponential(1/200));
 
-
   // create branches
   all_branches = [];
-  horizontal_branches_lengths = get_branches_lengths(1000, 11);
-  vertical_branches_lengths = get_branches_lengths(1000, 4);
+  horizontal_branches_lengths = get_branches_lengths(1000, 19);
+  vertical_branches_lengths = get_branches_lengths(1000, 8);
   branches_ystarts.forEach(ystart => {
     all_branches.push(new Branch(ystart, horizontal_branches_lengths, vertical_branches_lengths));
   });
 
   // draw branches
-  all_branches.forEach(branch => {
-    branch.draw();
-  });
-
+  for(var i = 0; i < branches_amount; i++){
+    all_branches[i].draw();
+    if(i % 100 == 0) console.log(i, "/", branches_amount, "done")
+  }
   console.log("done");
 }
 
@@ -52,13 +51,12 @@ class Branch{
     this.curx = 0;
     this.cury = ystart;
     this.hvector = createVector(11, 1).normalize();
-    this.vvector = createVector(2, -7).normalize();
+    this.vvector = createVector(3, -8).normalize();
     this.horizontal_branches_lengths = horizontal_branches_lengths;
     this.vertical_branches_lengths = vertical_branches_lengths;
     this.alpha = map(ystart, min_alpha_position, max_alpha_position, min_alpha_value, max_alpha_value, true);
-    console.log(this.alpha);
-    this.left_color = color(200, 10, 210, this.alpha);
-    this.right_color = color(200, 150, 50, this.alpha);
+    this.left_color = color(100, 10, 200, this.alpha);
+    this.right_color = color(50, 200, 110, this.alpha);
   }
 
   draw(){
@@ -77,7 +75,6 @@ class Branch{
         direction = "h";
       }
       col = lerpColor(this.left_color, this.right_color, this.curx/canvas_width);
-      console.log(col);
       stroke(col);
       line(this.curx, this.cury, newx, newy);
       this.curx = newx;
