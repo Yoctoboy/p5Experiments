@@ -3,7 +3,7 @@ function randomExponential(lambda){
     return -Math.log(randomUniform)/lambda;
 }
 
-function getRandomArbitrary(min, max) {
+function randomInterval(min, max) {
     return Math.random() * (max - min) + min;
 }
 
