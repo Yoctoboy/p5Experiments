@@ -26,7 +26,20 @@ function setup() {
   stroke(255);
 
   // put setup code here
-  all_branches.push(new Branch(200, 1050, direction=createVector(3, -5), division_rate=0.03, width=62))
+  all_branches.push(new Branch(200, 1050, direction=createVector(3, -5), division_rate=0.03, width=62));
+
+  draw_everything();
+}
+
+function draw_everything(){
+  while(all_branches.length != 0){
+    var new_branches = [];
+    all_branches.forEach(branch => new_branches.push(...branch.draw()));
+    all_branches.push(...new_branches);
+    drawing_step += 1;
+
+    all_branches = all_branches.filter(branch => branch.is_active);
+  }
 }
 
 
@@ -141,13 +154,4 @@ class Branch{
 
 function draw() {
 
-  var new_branches = [];
-  all_branches.forEach(branch => new_branches.push(...branch.draw()));
-  all_branches.push(...new_branches);
-  drawing_step += 1;
-
-  all_branches = all_branches.filter(branch => branch.is_active);
-
-  // terminate the program by using an unexisting function
-  if(all_branches.length == 0) fail();
 }
