@@ -31,6 +31,7 @@ function setup() {
   draw_everything();
 }
 
+
 function draw_everything(){
   while(all_branches.length != 0){
     var new_branches = [];
@@ -118,7 +119,7 @@ class Branch{
   update_width(){
     if (this.width > 30) this.width -= 0.03;
     else if (this.width > 10) this.width -= 0.02;
-    else this.width -= 0.01;
+    else this.width -= 0.007;
   }
 
   update_direction(){
@@ -142,7 +143,7 @@ class Branch{
   update_color_and_perlin_factor(){
     if (this.width < 1 && drawing_step > canvas_width * 1.7){
       stroke(200, 20, 50);
-      this.perlin_noise_factor = perlin_base_factor * 15;
+      this.perlin_noise_factor = perlin_base_factor * 10;
     }
     else{
       stroke(255);
