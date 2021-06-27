@@ -4,14 +4,14 @@ var canvas_height = 1000;
 let all_branches = [];
 let drawing_step = 0;
 
-let perlin_base_factor = 0.01;
+let perlin_base_factor = 0.018;
 
 function seed_random_modules(){
   const random_seed = Math.floor(random(0, 900000));
   const perlin_seed = Math.floor(random(0, 900000));
   randomSeed(random_seed);
   noise_module.seed(perlin_seed)
-  console.log("Random seed =", random_seed, " / Perlin seed =", perlin_seed);
+  console.log("Random seed =", random_seed, "/ Perlin seed =", perlin_seed);
 }
 
 function setup() {
@@ -129,7 +129,7 @@ class Branch{
   update_color_and_perlin_factor(){
     if (this.width < 1 && drawing_step > canvas_width * 1.7){
       stroke(200, 20, 50);
-      this.perlin_noise_factor = perlin_base_factor * 30;
+      this.perlin_noise_factor = perlin_base_factor * 15;
     }
     else{
       stroke(255);
