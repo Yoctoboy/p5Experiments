@@ -6,6 +6,10 @@ let drawing_step = 0;
 
 let perlin_base_factor = 0.018;
 
+
+// NICE SEEDS
+// Random seed = 624793 / Perlin seed = 221390
+// Random seed = 580955 / Perlin seed = 432440
 function seed_random_modules(){
   const random_seed = Math.floor(random(0, 900000));
   const perlin_seed = Math.floor(random(0, 900000));
@@ -18,6 +22,7 @@ function setup() {
   createCanvas(canvas_width, canvas_height);
 
   blendMode(ADD);
+  //blendMode(EXCLUSION);
   background(0);
   colorMode(RGB);
 
@@ -28,12 +33,12 @@ function setup() {
   // put setup code here
   all_branches.push(new Branch(200, 1050, direction=createVector(3, -5), division_rate=0.03, width=62));
 
-  draw_everything();
+  draw_tree();
   write_text();
 }
 
 
-function draw_everything(){
+function draw_tree(){
   while(all_branches.length != 0){
     var new_branches = [];
     all_branches.forEach(branch => new_branches.push(...branch.draw()));
@@ -55,6 +60,7 @@ class Branch{
     this.is_active = true;
     this.last_division = drawing_step;
     this.perlin_noise_factor = perlin_base_factor;
+    this.color_state = "white";
   }
 
   draw(){
@@ -121,6 +127,8 @@ class Branch{
     if (this.width > 30) this.width -= 0.03;
     else if (this.width > 10) this.width -= 0.02;
     else this.width -= 0.007;
+
+    this.width += noise_module.simplex2(this.curx, this.cury) * 0.2;
   }
 
   update_direction(){
@@ -143,11 +151,15 @@ class Branch{
 
   update_color_and_perlin_factor(){
     if (this.width < 1 && drawing_step > canvas_width * 1.7){
-      stroke(200, 20, 50);
+      this.color_state = "red";
+    }
+
+    if (this.color_state == "red"){
+      stroke(200, 20, 50, 255);
       this.perlin_noise_factor = perlin_base_factor * 10;
     }
-    else{
-      stroke(255);
+    else {
+      stroke(255, 255, 255, 255);
       this.perlin_noise_factor = perlin_base_factor;
     }
   }
@@ -156,12 +168,12 @@ class Branch{
 function write_text() {
   stroke(0);
   textAlign(CENTER, CENTER);
-  blendMode(DIFFERENCE);
-  textSize(65);
+  blendMode(EXCLUSION);
+  textSize(45);
   fill(255);
-  text("aleph", canvas_width/2, canvas_height/2 - 40)
-  fill(255,0,0);
-  text("blood tree", canvas_width/2, canvas_height/2 + 40);
+  text("aleph", canvas_width/2, canvas_height/3 - 30)
+  //fill(255,0,0);
+  text("blood tree", canvas_width/2, canvas_height/3 + 30);
 }
 
 function draw() {
