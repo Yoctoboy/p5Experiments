@@ -29,6 +29,7 @@ function setup() {
   all_branches.push(new Branch(200, 1050, direction=createVector(3, -5), division_rate=0.03, width=62));
 
   draw_everything();
+  write_text();
 }
 
 
@@ -152,6 +153,16 @@ class Branch{
   }
 }
 
+function write_text() {
+  stroke(0);
+  textAlign(CENTER, CENTER);
+  blendMode(DIFFERENCE);
+  textSize(65);
+  fill(255);
+  text("aleph", canvas_width/2, canvas_height/2 - 40)
+  fill(255,0,0);
+  text("blood tree", canvas_width/2, canvas_height/2 + 40);
+}
 
 function draw() {
 
