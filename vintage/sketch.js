@@ -1,5 +1,5 @@
-var canvas_width = 1400;
-var canvas_height = 1400;
+var canvasWidth = 1400;
+var canvasHeight = 1400;
 
 
 // put setup code here
@@ -51,8 +51,8 @@ function generate_disks_centers(){
   }
 
   xbary /= (disks_per_line * disks_lines); ybary /= (disks_per_line * disks_lines);
-  translate_x = (canvas_width)/2 - xbary;
-  translate_y = (canvas_height/2) - ybary;
+  translate_x = (canvasWidth)/2 - xbary;
+  translate_y = (canvasHeight/2) - ybary;
 
   disks_centers.forEach(element => {
     element.translate(translate_x, translate_y);
@@ -117,7 +117,7 @@ function draw_disks(disks_centers){
 
 
 function setup() {
-  createCanvas(canvas_width, canvas_height);
+  createCanvas(canvasWidth, canvasHeight);
   smooth()
   background(0);
   colorMode(RGB);
