@@ -6,30 +6,32 @@ let img;
 
 var randomFunctionCalls = 0;
 function randomSeeded(min = 0, max = 1) {
+  // will work for as long as it is used for setup only, as random draw effect
+  // will trigger this function in unpredictable way when changing constants
   randomFunctionCalls += 1;
   return map(
     noise_module.simplex3(
       (1.18416541 * randomFunctionCalls),
-      (window.randomSeed + 1.124568 * randomFunctionCalls),
-      (3 * window.randomSeed + 1.45971 * randomFunctionCalls)
+      (globalThis.randomSeed + 1.124568 * randomFunctionCalls),
+      (3 * globalThis.randomSeed + 1.45971 * randomFunctionCalls)
     ),
     -1, 1, min, max);
 }
 
 
 class Branch {
-  constructor(x, y, alpha, lineWidth) {
+  constructor(x, y, alpha, lineWidth, movementVariabilityFactor, colorVariabilityFactor, noiseSpeedFactor) {
     this.x = x
     this.y = y
     this.oldx = x;
     this.oldy = y;
     //this.startVectorVariabilityFactor = 0.002;
-    this.movementVariabilityFactor = 0.0006;
-    this.colorVariabilityFactor = 0.0004;
-    this.noiseSpeedFactor = 0.11;
+    this.movementVariabilityFactor = movementVariabilityFactor;
+    this.colorVariabilityFactor = colorVariabilityFactor;
+    this.noiseSpeedFactor = noiseSpeedFactor;
     this.speedVector = new p5.Vector(
       randomSeeded(-3.5, -3),
-      randomSeeded(3, 3.5)
+      randomSeeded(2, 2.5)
     )
     this.speedVectorNorm = this.speedVector.mag();
     this.normalizedSpeedVector = new p5.Vector(this.speedVector.x, this.speedVector.y).normalize();
@@ -83,13 +85,16 @@ class RandomWalkers {
   }
 
   create_branches() {
+    var movementVariabilityFactor = randomSeeded(0.0005, 0.0008);
+    var colorVariabilityFactor = randomSeeded(0.00035, 0.0005);
+    var noiseSpeedFactor = randomSeeded(0.09, 0.15);
     var startPositionLeft = new p5.Vector(400, -100)
     var startPositionRight = new p5.Vector(1000, 290);
     var branches = [];
     for (let i = 0; i < this.amount; i++) {
       const x = lerp(startPositionLeft.x, startPositionRight.x, i / this.amount);
       const y = lerp(startPositionLeft.y, startPositionRight.y, i / this.amount);
-      branches.push(new Branch(x, y, this.alpha, this.lineWidth));
+      branches.push(new Branch(x, y, this.alpha, this.lineWidth, movementVariabilityFactor, colorVariabilityFactor, noiseSpeedFactor));
     }
     return branches;
   }
@@ -113,8 +118,8 @@ function seed_random_modules(perlinSeed, randomSeed) {
   // nice values: 227504
   perlinSeed = perlinSeed ?? Math.floor(random(0, 900000));
   noise_module.seed(perlinSeed)
-  window.randomSeed = randomSeed ?? Math.floor(random(0, 900000));
-  console.log("Perlin seed =", perlinSeed, "/ Random seed =", window.randomSeed);
+  globalThis.randomSeed = randomSeed ?? Math.floor(random(0, 900000));
+  console.log("Perlin seed =", perlinSeed, "/ Random seed =", globalThis.randomSeed);
 }
 
 class Element2D {
@@ -258,7 +263,7 @@ function setup() {
   colorMode(RGB);
   // new PixelSortedLines(lineWidth = 2, layers = 5).drawAll();
   seed_random_modules()
-  new RandomWalkers(5000, 25, 1.5, 500).drawAll();
+  new RandomWalkers(7000, 15, 1.5, 500).drawAll();
   // new NoisyNoise().drawAll();
   new SquareFrame().drawAll(270, 255);
   new AlbumTextSetup().draw();
