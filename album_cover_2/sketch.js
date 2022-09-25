@@ -4,6 +4,18 @@ var canvasHeight = 1230;
 
 let img;
 
+var randomFunctionCalls = 0;
+function randomSeeded(min = 0, max = 1) {
+  randomFunctionCalls += 1;
+  return map(
+    noise_module.simplex3(
+      (1.18416541 * randomFunctionCalls),
+      (window.randomSeed + 1.124568 * randomFunctionCalls),
+      (3 * window.randomSeed + 1.45971 * randomFunctionCalls)
+    ),
+    -1, 1, min, max);
+}
+
 
 class Branch {
   constructor(x, y, alpha, lineWidth) {
@@ -11,12 +23,17 @@ class Branch {
     this.y = y
     this.oldx = x;
     this.oldy = y;
-    this.movementVariabilityFactor = 0.002;
-    this.colorVariabilityFactor = 0.0006;
-    this.speedVector = new p5.Vector(-4, 5);
-    this.normalizedSpeedVector = new p5.Vector(-4, 5).normalize();
+    //this.startVectorVariabilityFactor = 0.002;
+    this.movementVariabilityFactor = 0.0006;
+    this.colorVariabilityFactor = 0.0004;
+    this.noiseSpeedFactor = 0.11;
+    this.speedVector = new p5.Vector(
+      randomSeeded(-3.5, -3),
+      randomSeeded(3, 3.5)
+    )
+    this.speedVectorNorm = this.speedVector.mag();
+    this.normalizedSpeedVector = new p5.Vector(this.speedVector.x, this.speedVector.y).normalize();
     this.visible = true;
-    this.noiseSpeedFactor = 0.05;
     this.alpha = alpha;
     this.overlayCompensationFactor = 0.95;
     this.lineWidth = lineWidth
@@ -30,15 +47,16 @@ class Branch {
       this.oldy = this.y + (this.lineWidth * this.overlayCompensationFactor * this.normalizedSpeedVector.y);
       this.speedVector.x += this.noiseSpeedFactor * noise_module.simplex3(this.x * this.movementVariabilityFactor, this.y * this.movementVariabilityFactor, 0);
       this.speedVector.y += this.noiseSpeedFactor * noise_module.simplex3(this.y * this.movementVariabilityFactor + 200, this.x * this.movementVariabilityFactor, 0);
+      this.speedVector.normalize().mult(this.speedVectorNorm)
       this.x += this.speedVector.x;
       this.y += this.speedVector.y;
 
       // draws a straight, semi-transparent line between former and current position of the branch
       strokeWeight(this.lineWidth);
       stroke(
-        map(noise_module.simplex3(this.x * this.colorVariabilityFactor, this.y * this.colorVariabilityFactor, 0), -1, 1, 0, 255),
-        map(noise_module.simplex3(this.y * this.colorVariabilityFactor + 200, this.x * this.colorVariabilityFactor, 0), -1, 1, 0, 255),
-        map(noise_module.simplex3(this.x * this.colorVariabilityFactor + 400, this.y * this.colorVariabilityFactor, 0), -1, 1, 0, 255),
+        map(noise_module.simplex3(this.x * this.colorVariabilityFactor, this.y * this.colorVariabilityFactor, 0), -1, 1, 50, 255),
+        map(noise_module.simplex3(this.y * this.colorVariabilityFactor + 200, this.x * this.colorVariabilityFactor, 0), -1, 1, 50, 200),
+        map(noise_module.simplex3(this.x * this.colorVariabilityFactor + 400, this.y * this.colorVariabilityFactor, 10), -1, 1, 50, 255),
         this.alpha
       );
       // stroke(200, 0, 200, 12)
@@ -48,7 +66,7 @@ class Branch {
 
   update_visible() {
     // if the current position of the branch is outside the canvas' boundaries, do not draw it anymore
-    if (this.y < - 200 || this.x < - 200 || this.x > canvasWidth + 200 || this.y > canvasHeight + 200) this.visible = false;
+    if (this.y < -100 || this.x < 0 || this.x > canvasWidth || this.y > canvasHeight) this.visible = false;
   }
 }
 
@@ -56,18 +74,21 @@ class RandomWalkers {
   // higher factor makes the branches faster and makes them stay more grouped
   // recommended range: [0.1, 10]
 
-  constructor(amount, alpha, lineWidth) {
+  constructor(amount, alpha, lineWidth, maxSteps) {
     this.amount = amount
     this.allBranches = [];
     this.alpha = alpha
-    this.lineWidth = lineWidth ?? 1
+    this.lineWidth = lineWidth ?? 1;
+    this.maxSteps = maxSteps
   }
 
   create_branches() {
+    var startPositionLeft = new p5.Vector(400, -100)
+    var startPositionRight = new p5.Vector(1000, 290);
     var branches = [];
     for (let i = 0; i < this.amount; i++) {
-      const x = (i / this.amount) * canvasWidth;
-      const y = - 100;
+      const x = lerp(startPositionLeft.x, startPositionRight.x, i / this.amount);
+      const y = lerp(startPositionLeft.y, startPositionRight.y, i / this.amount);
       branches.push(new Branch(x, y, this.alpha, this.lineWidth));
     }
     return branches;
@@ -76,7 +97,7 @@ class RandomWalkers {
   drawAll() {
     var step = 0;
     var allBranches = this.create_branches();
-    while (allBranches.length > (this.amount * 0.001) && step < 1000) {
+    while (allBranches.length > (this.amount * 0.001) && step < this.maxSteps) {
       step++;
       allBranches = allBranches.filter(branch => branch.visible);
       allBranches.forEach(branch => {
@@ -88,11 +109,12 @@ class RandomWalkers {
   }
 }
 
-function seed_random_modules(perlinSeed) {
+function seed_random_modules(perlinSeed, randomSeed) {
   // nice values: 227504
   perlinSeed = perlinSeed ?? Math.floor(random(0, 900000));
   noise_module.seed(perlinSeed)
-  console.log("Perlin seed =", perlinSeed);
+  window.randomSeed = randomSeed ?? Math.floor(random(0, 900000));
+  console.log("Perlin seed =", perlinSeed, "/ Random seed =", window.randomSeed);
 }
 
 class Element2D {
@@ -219,6 +241,15 @@ class SquareFrame {
   }
 }
 
+class AlbumTextSetup {
+  constructor() { }
+  draw() {
+    stroke(0)
+    strokeWeight(0.8)
+    line(480, canvasHeight - 135, canvasWidth - 480, canvasHeight - 135);
+  }
+}
+
 function setup() {
   createCanvas(canvasWidth, canvasHeight);
   background(0);
@@ -227,9 +258,10 @@ function setup() {
   colorMode(RGB);
   // new PixelSortedLines(lineWidth = 2, layers = 5).drawAll();
   seed_random_modules()
-  new RandomWalkers(30000, 7).drawAll();
+  new RandomWalkers(5000, 25, 1.5, 500).drawAll();
   // new NoisyNoise().drawAll();
   new SquareFrame().drawAll(270, 255);
+  new AlbumTextSetup().draw();
 }
 
 function draw() {
