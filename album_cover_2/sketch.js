@@ -18,25 +18,24 @@ function randomSeeded(min = 0, max = 1) {
 
 
 class Branch {
-  constructor(x, y, alpha, lineWidth) {
+  constructor(x, y, alpha) {
     this.x = x
     this.y = y
     this.oldx = x;
     this.oldy = y;
+    this.movementVariabilityFactor = 0.0002;
+    this.colorVariabilityFactor = 0.00015;
+    this.noiseSpeedFactor = 0.07;
     //this.startVectorVariabilityFactor = 0.002;
-    this.movementVariabilityFactor = 0.0006;
-    this.colorVariabilityFactor = 0.0004;
-    this.noiseSpeedFactor = 0.11;
     this.speedVector = new p5.Vector(
-      randomSeeded(-3.5, -3),
-      randomSeeded(3, 3.5)
+      randomSeeded(-1, -0.7),
+      randomSeeded(3, 3.2)
     )
     this.speedVectorNorm = this.speedVector.mag();
     this.normalizedSpeedVector = new p5.Vector(this.speedVector.x, this.speedVector.y).normalize();
     this.visible = true;
     this.alpha = alpha;
     this.overlayCompensationFactor = 0.95;
-    this.lineWidth = lineWidth
   }
 
 
@@ -52,10 +51,9 @@ class Branch {
       this.y += this.speedVector.y;
 
       // draws a straight, semi-transparent line between former and current position of the branch
-      strokeWeight(this.lineWidth);
       stroke(
         map(noise_module.simplex3(this.x * this.colorVariabilityFactor, this.y * this.colorVariabilityFactor, 0), -1, 1, 50, 255),
-        map(noise_module.simplex3(this.y * this.colorVariabilityFactor + 200, this.x * this.colorVariabilityFactor, 0), -1, 1, 50, 200),
+        map(noise_module.simplex3(this.y * this.colorVariabilityFactor + 200, this.x * this.colorVariabilityFactor, 0), -1, 1, 0, 200),
         map(noise_module.simplex3(this.x * this.colorVariabilityFactor + 400, this.y * this.colorVariabilityFactor, 10), -1, 1, 50, 255),
         this.alpha
       );
@@ -83,18 +81,19 @@ class RandomWalkers {
   }
 
   create_branches() {
-    var startPositionLeft = new p5.Vector(400, -100)
-    var startPositionRight = new p5.Vector(1000, 290);
+    var startPositionLeft = new p5.Vector(500, 0)
+    var startPositionRight = new p5.Vector(1000, 200);
     var branches = [];
     for (let i = 0; i < this.amount; i++) {
       const x = lerp(startPositionLeft.x, startPositionRight.x, i / this.amount);
       const y = lerp(startPositionLeft.y, startPositionRight.y, i / this.amount);
-      branches.push(new Branch(x, y, this.alpha, this.lineWidth));
+      branches.push(new Branch(x, y, this.alpha));
     }
     return branches;
   }
 
   drawAll() {
+    strokeWeight(this.lineWidth);
     var step = 0;
     var allBranches = this.create_branches();
     while (allBranches.length > (this.amount * 0.001) && step < this.maxSteps) {
@@ -246,7 +245,7 @@ class AlbumTextSetup {
   draw() {
     stroke(0)
     strokeWeight(0.8)
-    line(480, canvasHeight - 135, canvasWidth - 480, canvasHeight - 135);
+    line(480, canvasHeight - 125, canvasWidth - 480, canvasHeight - 125);
   }
 }
 
@@ -258,9 +257,15 @@ function setup() {
   colorMode(RGB);
   // new PixelSortedLines(lineWidth = 2, layers = 5).drawAll();
   seed_random_modules()
-  new RandomWalkers(5000, 25, 1.5, 500).drawAll();
+  //seed_random_modules(312028, 462871);
+  new RandomWalkers(5000, 18, 2, 500).drawAll();
+  // fast:
+  //new RandomWalkers(1000, 25, 4, 300).drawAll();
   // new NoisyNoise().drawAll();
-  new SquareFrame().drawAll(270, 255);
+  new SquareFrame().drawAll(275, 135);
+  new SquareFrame().drawAll(260, 255);
+  //new SquareFrame().drawAll(260, 255); //color(80, 0, 90, 255));
+  //new SquareFrame().drawAll(250, 255);
   new AlbumTextSetup().draw();
 }
 
