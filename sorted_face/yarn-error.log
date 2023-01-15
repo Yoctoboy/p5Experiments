@@ -1,0 +1,41 @@
+Arguments: 
+  /usr/bin/node /usr/share/yarn/bin/yarn.js build
+
+PATH: 
+  /home/alexis/.codon/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/Intel/WiFi/bin/:/mnt/c/Program Files/Common Files/Intel/WirelessCommon/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Users/alexis/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/alexis/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Program Files/Intel/WiFi/bin/:/mnt/c/Program Files/Common Files/Intel/WirelessCommon/
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  16.19.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  SyntaxError: /mnt/c/Users/alexis/Documents/Code/p5Experiments/sorted_face/package.json: Unexpected token } in JSON at position 318
+      at JSON.parse (<anonymous>)
+      at /usr/share/yarn/lib/cli.js:1629:59
+      at Generator.next (<anonymous>)
+      at step (/usr/share/yarn/lib/cli.js:310:30)
+      at /usr/share/yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "sorted_face",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "scripts": {
+      "build": "esbuild src/sketch.js --sourcemap --bundle --outfile=static/bundle.js",
+      "autobuild": "yarn build && onchange . -e 'static' -- yarn build",
+      "serve": "yarn build && http-server ./static"
+    },
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
