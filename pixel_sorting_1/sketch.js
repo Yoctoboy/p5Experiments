@@ -2,16 +2,16 @@
 // chromium-browser --disable-web-security --allow-file-access-from-files --user-data-dir="Documents/perso/p5Experiments/tmp"
 
 // replace these values with image size
-let canvas_width = 1127;
-let canvas_height = 699;
-let image_name = "new_york_1.jpg"
+let canvas_width = 1920;
+let canvas_height = 1080;
+let image_name = "cyberpunk_1.jpg"
 
 let p5Image, pixmat;
 
 let debug = false;
 
 // controls how much glitch there will be in the picture, lower is more glitch
-let glitch_factor = 0.75
+let glitch_factor = 0.3
 
 function preload() {
   p5Image = loadImage('assets/' + image_name);
@@ -85,16 +85,18 @@ function pixel_sort(pixmat, region_map){
     first_line = 0;
     while(region_map[first_line][column] == 0) first_line++;
     last_line = first_line;
-    while(region_map[last_line][column] == 1) last_line++;
+    while(region_map[last_line][column] == 1 && last_line < canvas_height - 1) last_line++;
     pixColumnToSort = []
     for(var line = first_line; line <= last_line; line++){
       pixColumnToSort.push(pixmat[line][column]);
     }
     // sort on brightness
     // pixColumnToSort.sort((a, b) => (a[0] + a[1] + a[2]) - (b[0] + b[1] + b[2]));
+    // sort on  reverse brightness
+    // pixColumnToSort.sort((a, b) => (b[0] + b[1] + b[2]) - (a[0] + a[1] + a[2]));
 
     // sort on red
-    pixColumnToSort.sort((a, b) => a[0] - b[0]);
+    // pixColumnToSort.sort((a, b) => a[0] - b[0]);
     // sort on yellow
     pixColumnToSort.sort((a, b) => (a[0] + a[1]) - (b[0] + b[1]));
     // sort on blue
