@@ -18,14 +18,14 @@ function preload() {
 function getImagePixels() {
   img.loadPixels();
   const flatPixels = img.pixels;
-  let pixels = new Array(canvas_height);
+  let imgPixels = new Array(canvas_height);
   for (var i = 0; i < canvas_height; i++) {
-    pixels[i] = new Array();
+    imgPixels[i] = new Array();
     for (var j = 0; j < canvas_width; j++) {
-      pixels[i].push(flatPixels.subarray((i * 4 * canvas_height) + 4 * j, i * 4 * canvas_height + 4 * j + 4))
+      imgPixels[i].push(flatPixels.subarray((i * 4 * canvas_height) + 4 * j, i * 4 * canvas_height + 4 * j + 4))
     }
   }
-  return pixels;
+  return imgPixels;
 }
 
 
@@ -56,7 +56,9 @@ function blacken() {
         blackenedPixels[i][j] = [255, 255, 255, 255];
     }
   }
+  pixels = blackenedPixels
   updatePixels();
+  return blackenedPixels;
 }
 
 
@@ -64,15 +66,15 @@ function constructRandomSolution(direction, pixelsToFollow, linesAmount) {
   let solutionLines = [];
   const weight = 1;
   for (var i = 0; i < linesAmount; i++) {
-    let shade = randInt(0, 255);
-    let x1 = randInt(canvas_height / 4, 3 * canvas_width / 4);
-    let y1 = randInt(canvas_height / 4, 3 * canvas_width / 4);
+    let shade = randInt(10, 255);
+    let x1 = randInt(canvas_height / 6, 5 * canvas_width / 6);
+    let y1 = randInt(canvas_height / 6, 5 * canvas_width / 6);
     let point = new Element2D(x1, y1);
     let point2 = point.translate(direction, randInt(canvas_height / 10, canvas_height / 2));
     let x2 = point2.x;
     let y2 = point2.y;
     solutionLines.push(
-      new Line(x1, y1, x2, y2, weight, shade)
+      new Line(x1, y1, x2, y2, weight, shade, direction)
     )
   }
   return new Solution(solutionLines, pixelsToFollow, canvas_height, canvas_width);
@@ -84,9 +86,9 @@ function pixelGlitch(directionVector, pixelsToFollow) {
   // draw a bunch of random lines along the same direction vector
   // then use a genetic algorithm to make these lines as close as possible to the pixelsToFollow matrix
   const populationSize = 10; // amount of item per generation
-  const maxGeneration = 10; // amount of generation iterations
+  const maxGeneration = 100; // amount of generation iterations
   const mutationRate = 0.1;
-  const linesPerSolutionAmount = 100;
+  const linesPerSolutionAmount = 300;
   const firstGenerationSolutions = []
   for (var i = 0; i < populationSize; i++) {
     firstGenerationSolutions.push(
@@ -97,7 +99,20 @@ function pixelGlitch(directionVector, pixelsToFollow) {
       )
     )
   };
-  firstGenerationSolutions[0].draw();
+  firstGenerationSolutions.forEach(x => {
+    x.draw();
+  });
+  
+  // breeding
+  let currentGenerationSolutions = firstGenerationSolutions
+  let currentGeneration = 0;
+  let newGenerationSolutions = [];
+  while(currentGeneration <= maxGeneration){
+    currentGenerationSolutions.sort((x, y) => x.distance < y.distance);
+    console.log(`Best of generation ${currentGeneration}: ${currentGenerationSolutions[0].distance}`);
+    currentGeneration += 1;
+    newGenerationSolutions = [];
+  }
 }
 
 
