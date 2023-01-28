@@ -69,8 +69,8 @@ function constructRandomSolution(direction, pixelsToFollow, linesAmount) {
   const weight = 1;
   for (var i = 0; i < linesAmount; i++) {
     let shade = randInt(10, 255);
-    let x1 = randInt(canvas_height / 6, 5 * canvas_width / 6);
-    let y1 = randInt(canvas_height / 6, 5 * canvas_width / 6);
+    let x1 = randInt(0, canvas_width);
+    let y1 = randInt(0, canvas_height);
     let point = new Element2D(x1, y1);
     let point2 = point.translate(direction, randInt(canvas_height / 10, canvas_height / 2));
     let x2 = point2.x;
@@ -79,7 +79,7 @@ function constructRandomSolution(direction, pixelsToFollow, linesAmount) {
       new Line(x1, y1, x2, y2, weight, shade, direction)
     )
   }
-  return new Solution(solutionLines, pixelsToFollow, canvas_height, canvas_width);
+  return new Solution(solutionLines, canvas_height, canvas_width);
 }
 
 
@@ -87,12 +87,12 @@ function constructRandomSolution(direction, pixelsToFollow, linesAmount) {
 function pixelGlitch(directionVector, pixelsToFollow) {
   // draw a bunch of random lines along the same direction vector
   // then use a genetic algorithm to make these lines as close as possible to the pixelsToFollow matrix
-  const maxGeneration = 10; // amount of generation iterations
-  const populationSize = 200; // amount of item per generation
-  const bestSolutionsToKeepInEachGenerationAmount = 30;
+  const maxGeneration = 100; // amount of generation iterations
+  const populationSize = 250; // amount of item per generation
+  const bestSolutionsToKeepInEachGenerationAmount = 40;
   const randomSolutionsToKeepInEachGenerationAmount = 5;
-  const mutationRate = 0.15;
-  const mutationStrengthFactor = 0.02;
+  const mutationRate = 0.1;
+  const mutationStrengthFactor = 0.04;
   const linesPerSolutionAmount = 500;
   const firstGenerationSolutions = []
   for (var i = 0; i < populationSize; i++) {
@@ -105,48 +105,47 @@ function pixelGlitch(directionVector, pixelsToFollow) {
     )
   };
   firstGenerationSolutions.forEach(x => {
-    x.draw();
+    x.draw(pixelsToFollow);
   });
-  
+
   // breeding
   let currentGenerationSolutions = firstGenerationSolutions
   let currentGeneration = 0;
   let newGenerationSolutions = [];
   let curBest = 0;
-  while(currentGeneration < maxGeneration){
+  while (currentGeneration < maxGeneration) {
     currentGenerationSolutions = currentGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
-    console.log(`Best of generation ${currentGeneration}: ${currentGenerationSolutions[0].distance / 1e6}`);
+    console.log(`Best of generation ${currentGeneration}: ${(currentGenerationSolutions[0].distance).toFixed(2)}`);
     curBest = currentGenerationSolutions[0].distance;
     currentGeneration += 1;
     newGenerationSolutions = [];
-    for(var i = 0; i < bestSolutionsToKeepInEachGenerationAmount; i++){
+    for (var i = 0; i < bestSolutionsToKeepInEachGenerationAmount; i++) {
       newGenerationSolutions.push(currentGenerationSolutions[i]);
     }
-    for(var i = 0; i < randomSolutionsToKeepInEachGenerationAmount; i++){
+    for (var i = 0; i < randomSolutionsToKeepInEachGenerationAmount; i++) {
       const index = randInt(bestSolutionsToKeepInEachGenerationAmount, populationSize - 1)
       newGenerationSolutions.push(currentGenerationSolutions[index]);
     }
     // make children between some of the best solutions of the current generation
-    while(newGenerationSolutions.length < populationSize){
+    while (newGenerationSolutions.length < populationSize) {
       const index1 = randInt(0, bestSolutionsToKeepInEachGenerationAmount + randomSolutionsToKeepInEachGenerationAmount - 1)
       const index2 = randInt(0, bestSolutionsToKeepInEachGenerationAmount + randomSolutionsToKeepInEachGenerationAmount - 1)
       const newSol = newGenerationSolutions[index1].makeChild(newGenerationSolutions[index2])
       newSol.mutate(mutationRate, mutationStrengthFactor);
       newGenerationSolutions.push(newSol.clone())
-      newGenerationSolutions.at(-1).draw();
+      newGenerationSolutions.at(-1).draw(pixelsToFollow);
     }
-    newGenerationSolutions = newGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
-    // console.log(curBest, newGenerationSolutions[0].distance)
-    currentGenerationSolutions = newGenerationSolutions;
+    currentGenerationSolutions = newGenerationSolutions.map(s => s.deepClone());
+    newGenerationSolutions.map(x => x.clear())
   }
   currentGenerationSolutions = currentGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
-  console.log(`Best of generation ${maxGeneration}: ${currentGenerationSolutions[0].distance / 1e6}`);
+  console.log(`Best of generation ${maxGeneration}: ${(currentGenerationSolutions[0].distance).toFixed(2)}`);
 }
 
 
 function setup() {
   createCanvas(canvas_width, canvas_height);
-  image(img, 0, 0);
+  image(img, 0, 0, canvas_width, canvas_height);
   colorMode(RGB);
   seed_random_modules()
 
@@ -159,7 +158,7 @@ function setup() {
 function draw() {
   // put drawing code here
   const blackenedPixels = blacken();
-  pixelGlitch(new Element2D(1, 1), blackenedPixels);
+  pixelGlitch(new Element2D(1, 1), JSON.parse(JSON.stringify(blackenedPixels)));
 }
 
 window.draw = draw;

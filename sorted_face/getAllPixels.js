@@ -1,7 +1,7 @@
-export function getAllPixels(canvas_height, canvas_width, pg) {
+export function getAllPixels(canvas_height, canvas_width, renderer) {
     // const flatPixels = get(0, 0, canvas_height, canvas_width).pixels;
-    pg.loadPixels();
-    const flatPixels = pg.pixels;
+    renderer.loadPixels();
+    const flatPixels = renderer.pixels;
     let imgPixels = new Array(canvas_height);
     for (var i = 0; i < canvas_height; i++) {
         imgPixels[i] = new Array();

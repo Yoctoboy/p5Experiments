@@ -6,13 +6,18 @@ export class Line {
         this.y2 = y2;
         this.weight = weight;
         this.color = col;
-        this.direction = direction
+        this.direction = direction;
         this.heightLevel = this.computeHeight(); // height of line on x=0
+        this.length = Math.pow(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2), 0.5);
     }
 
-    computeHeight(){
+    deepClone() {
+        return new Line(this.x1, this.y1, this.x2, this.y2, this.weight, this.color, this.direction)
+    }
+
+    computeHeight() {
         const reverseDirectionAmount = this.x1 / this.direction.x;
-        return this.y1 - (reverseDirectionAmount * this.direction.y); 
+        return this.y1 - (reverseDirectionAmount * this.direction.y);
     }
 
     draw(pg) {
