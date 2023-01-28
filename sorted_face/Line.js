@@ -20,4 +20,10 @@ export class Line {
         pg.strokeWeight(this.weight);
         pg.line(this.x1, this.y1, this.x2, this.y2);
     }
+
+    drawMain() {
+        stroke(this.color);
+        strokeWeight(this.weight);
+        line(this.x1, this.y1, this.x2, this.y2);
+    }
 }

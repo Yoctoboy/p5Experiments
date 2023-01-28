@@ -1,6 +1,8 @@
 import { Element2D } from "./Element2D.js";
 import { Line } from "./Line.js";
 import { Solution } from "./Solution.js";
+// import cloneDeep from 'lodash.clonedeep';
+
 
 // "yarn serve" at the root of the repo
 // then go to http://127.0.0.1:8080/sorted_face/index.html
@@ -85,10 +87,13 @@ function constructRandomSolution(direction, pixelsToFollow, linesAmount) {
 function pixelGlitch(directionVector, pixelsToFollow) {
   // draw a bunch of random lines along the same direction vector
   // then use a genetic algorithm to make these lines as close as possible to the pixelsToFollow matrix
-  const populationSize = 10; // amount of item per generation
-  const maxGeneration = 100; // amount of generation iterations
-  const mutationRate = 0.1;
-  const linesPerSolutionAmount = 300;
+  const maxGeneration = 10; // amount of generation iterations
+  const populationSize = 200; // amount of item per generation
+  const bestSolutionsToKeepInEachGenerationAmount = 30;
+  const randomSolutionsToKeepInEachGenerationAmount = 5;
+  const mutationRate = 0.15;
+  const mutationStrengthFactor = 0.02;
+  const linesPerSolutionAmount = 500;
   const firstGenerationSolutions = []
   for (var i = 0; i < populationSize; i++) {
     firstGenerationSolutions.push(
@@ -107,12 +112,35 @@ function pixelGlitch(directionVector, pixelsToFollow) {
   let currentGenerationSolutions = firstGenerationSolutions
   let currentGeneration = 0;
   let newGenerationSolutions = [];
-  while(currentGeneration <= maxGeneration){
-    currentGenerationSolutions.sort((x, y) => x.distance < y.distance);
-    console.log(`Best of generation ${currentGeneration}: ${currentGenerationSolutions[0].distance}`);
+  let curBest = 0;
+  while(currentGeneration < maxGeneration){
+    currentGenerationSolutions = currentGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
+    console.log(`Best of generation ${currentGeneration}: ${currentGenerationSolutions[0].distance / 1e6}`);
+    curBest = currentGenerationSolutions[0].distance;
     currentGeneration += 1;
     newGenerationSolutions = [];
+    for(var i = 0; i < bestSolutionsToKeepInEachGenerationAmount; i++){
+      newGenerationSolutions.push(currentGenerationSolutions[i]);
+    }
+    for(var i = 0; i < randomSolutionsToKeepInEachGenerationAmount; i++){
+      const index = randInt(bestSolutionsToKeepInEachGenerationAmount, populationSize - 1)
+      newGenerationSolutions.push(currentGenerationSolutions[index]);
+    }
+    // make children between some of the best solutions of the current generation
+    while(newGenerationSolutions.length < populationSize){
+      const index1 = randInt(0, bestSolutionsToKeepInEachGenerationAmount + randomSolutionsToKeepInEachGenerationAmount - 1)
+      const index2 = randInt(0, bestSolutionsToKeepInEachGenerationAmount + randomSolutionsToKeepInEachGenerationAmount - 1)
+      const newSol = newGenerationSolutions[index1].makeChild(newGenerationSolutions[index2])
+      newSol.mutate(mutationRate, mutationStrengthFactor);
+      newGenerationSolutions.push(newSol.clone())
+      newGenerationSolutions.at(-1).draw();
+    }
+    newGenerationSolutions = newGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
+    // console.log(curBest, newGenerationSolutions[0].distance)
+    currentGenerationSolutions = newGenerationSolutions;
   }
+  currentGenerationSolutions = currentGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
+  console.log(`Best of generation ${maxGeneration}: ${currentGenerationSolutions[0].distance / 1e6}`);
 }
 
 
