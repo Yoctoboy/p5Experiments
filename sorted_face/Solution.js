@@ -52,6 +52,8 @@ export class Solution {
         image(renderer, 0, 0, this.canvas_width, this.canvas_height);
         renderer.updatePixels();
         this.computeDistance(pixelsToFollow, renderer);
+        renderer.remove();
+        renderer.elt = null;
         renderer.pInst = null;
         renderer = null;
     }
@@ -78,12 +80,12 @@ export class Solution {
                 return new Line(x1, y1, point2.x, point2.y, 1, shade, line.direction)
             }
             else if (choice < 0.55) { // modify a random line along its axis
-                let shade = Math.min(Math.max(line.shade + randInt(-50, 50), 10), 255) // modify shade by something in [-50, 50]
+                let shade = clip(line.shade + randInt(-50, 50), 10, 255) // modify shade by something in [-50, 50]
                 let point = new Element2D(line.x1, line.y1);
                 let point2 = point.translate(line.direction, line.length + randInt(-Math.min(line.length / 4, 50), 50));
                 return new Line(line.x1, line.y1, point2.x, point2.y, 1, shade, line.direction)
             } else {
-                let shade = Math.min(Math.max(line.shade + randInt(-50, 50), 10), 255) // modify shade by something in [-50, 50]
+                let shade = clip(line.shade + randInt(-50, 50), 10, 255) // modify shade by something in [-50, 50]
                 let point2 = new Element2D(line.x2, line.y2);
                 let point = point2.translate(line.direction, - (line.length + randInt(-Math.min(line.length / 4, 50), 50)));
                 return new Line(point.x1, point.y1, line.x2, line.y2, 1, shade, line.direction)

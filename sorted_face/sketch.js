@@ -87,7 +87,7 @@ function constructRandomSolution(direction, pixelsToFollow, linesAmount) {
 function pixelGlitch(directionVector, pixelsToFollow) {
   // draw a bunch of random lines along the same direction vector
   // then use a genetic algorithm to make these lines as close as possible to the pixelsToFollow matrix
-  const maxGeneration = 100; // amount of generation iterations
+  const maxGeneration = 200; // amount of generation iterations
   const populationSize = 250; // amount of item per generation
   const bestSolutionsToKeepInEachGenerationAmount = 40;
   const randomSolutionsToKeepInEachGenerationAmount = 5;
@@ -109,13 +109,14 @@ function pixelGlitch(directionVector, pixelsToFollow) {
   });
 
   // breeding
-  let currentGenerationSolutions = firstGenerationSolutions
+  let currentGenerationSolutions = firstGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
+  let firstGenDistance = currentGenerationSolutions[0].distance;
+  let lastGenDistance = currentGenerationSolutions[0].distance;
+  console.log(`Start: ${firstGenDistance}`);
   let currentGeneration = 0;
   let newGenerationSolutions = [];
   let curBest = 0;
   while (currentGeneration < maxGeneration) {
-    currentGenerationSolutions = currentGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
-    console.log(`Best of generation ${currentGeneration}: ${(currentGenerationSolutions[0].distance).toFixed(2)}`);
     curBest = currentGenerationSolutions[0].distance;
     currentGeneration += 1;
     newGenerationSolutions = [];
@@ -136,10 +137,14 @@ function pixelGlitch(directionVector, pixelsToFollow) {
       newGenerationSolutions.at(-1).draw(pixelsToFollow);
     }
     currentGenerationSolutions = newGenerationSolutions.map(s => s.deepClone());
-    newGenerationSolutions.map(x => x.clear())
+    newGenerationSolutions = newGenerationSolutions.map(x => x.clear()).map(() => null)
+    currentGenerationSolutions = currentGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
+    let thisGenDistance = currentGenerationSolutions[0].distance;
+    console.log(`Best of generation ${currentGeneration}: ${(thisGenDistance).toFixed(2)} (this: -${invertPercentage(thisGenDistance, lastGenDistance).toFixed(2)}%, total: -${invertPercentage(thisGenDistance, firstGenDistance).toFixed(2)}%)`);
+    lastGenDistance = thisGenDistance;
   }
   currentGenerationSolutions = currentGenerationSolutions.sort((x, y) => x.distance < y.distance ? -1 : 1);
-  console.log(`Best of generation ${maxGeneration}: ${(currentGenerationSolutions[0].distance).toFixed(2)}`);
+  currentGenerationSolutions[0].drawMain();
 }
 
 
