@@ -1,17 +1,20 @@
 import { Element2D } from "./Element2D.js";
-import { Line } from "./Line.js";
 import { Solution } from "./Solution.js";
-// import cloneDeep from 'lodash.clonedeep';
+import { canvasHeight, canvasWidth, image_name } from './constants.js';
 
 
 // "yarn serve" at the root of the repo
 // then go to http://127.0.0.1:8080/sorted_face/index.html
 
+
+/*
+ * BESTS SO FAR
+ * 3743.44
+ * - 23.2% (gen 20)
+ */
+
 let img;
 
-const image_name = 'face_1_687.jpg'
-var canvas_width = 687;
-var canvas_height = 687;
 
 function preload() {
   img = loadImage('assets/' + image_name);
@@ -20,11 +23,11 @@ function preload() {
 function getImagePixels() {
   img.loadPixels();
   const flatPixels = img.pixels;
-  let imgPixels = new Array(canvas_height);
-  for (var i = 0; i < canvas_height; i++) {
+  let imgPixels = new Array(canvasHeight);
+  for (var i = 0; i < canvasHeight; i++) {
     imgPixels[i] = new Array();
-    for (var j = 0; j < canvas_width; j++) {
-      imgPixels[i].push(flatPixels.subarray((i * 4 * canvas_height) + 4 * j, i * 4 * canvas_height + 4 * j + 4))
+    for (var j = 0; j < canvasWidth; j++) {
+      imgPixels[i].push(flatPixels.subarray((i * 4 * canvasHeight) + 4 * j, i * 4 * canvasHeight + 4 * j + 4))
     }
   }
   return imgPixels;
@@ -48,10 +51,10 @@ function blacken() {
   // const threshold = (max + min) / 2;
   const threshold = 80
 
-  let blackenedPixels = new Array(canvas_height);
-  for (var i = 0; i < canvas_height; i++) {
-    blackenedPixels[i] = new Array(canvas_width)
-    for (var j = 0; j < canvas_width; j++) {
+  let blackenedPixels = new Array(canvasHeight);
+  for (var i = 0; i < canvasHeight; i++) {
+    blackenedPixels[i] = new Array(canvasWidth)
+    for (var j = 0; j < canvasWidth; j++) {
       if (pix[i][j][0] < threshold)
         blackenedPixels[i][j] = [0, 0, 0, 0];
       else
@@ -64,42 +67,24 @@ function blacken() {
 }
 
 
-function constructRandomSolution(direction, pixelsToFollow, linesAmount) {
-  let solutionLines = [];
-  const weight = 1;
-  for (var i = 0; i < linesAmount; i++) {
-    let shade = randInt(10, 255);
-    let x1 = randInt(0, canvas_width);
-    let y1 = randInt(0, canvas_height);
-    let point = new Element2D(x1, y1);
-    let point2 = point.translate(direction, randInt(canvas_height / 10, canvas_height / 2));
-    let x2 = point2.x;
-    let y2 = point2.y;
-    solutionLines.push(
-      new Line(x1, y1, x2, y2, weight, shade, direction)
-    )
-  }
-  return new Solution(solutionLines, canvas_height, canvas_width);
-}
-
-
 
 function pixelGlitch(directionVector, pixelsToFollow) {
   // draw a bunch of random lines along the same direction vector
   // then use a genetic algorithm to make these lines as close as possible to the pixelsToFollow matrix
-  const maxGeneration = 200; // amount of generation iterations
-  const populationSize = 250; // amount of item per generation
-  const bestSolutionsToKeepInEachGenerationAmount = 40;
-  const randomSolutionsToKeepInEachGenerationAmount = 5;
+  const maxGeneration = 50; // amount of generation iterations
+  const populationSize = 350; // amount of item per generation
+  const bestSolutionsToKeepInEachGenerationAmount = 30;
+  const randomSolutionsToKeepInEachGenerationAmount = 12;
+  const initialSolutionsToKeepInEachGenerationAmount = 4;
+  const totalSolutionsToKeepInEachGenerationAmount = bestSolutionsToKeepInEachGenerationAmount + randomSolutionsToKeepInEachGenerationAmount + initialSolutionsToKeepInEachGenerationAmount;
   const mutationRate = 0.1;
   const mutationStrengthFactor = 0.04;
   const linesPerSolutionAmount = 500;
   const firstGenerationSolutions = []
   for (var i = 0; i < populationSize; i++) {
     firstGenerationSolutions.push(
-      constructRandomSolution(
+      Solution.initializeRandomLocalizedSolution(
         directionVector,
-        pixelsToFollow,
         linesPerSolutionAmount,
       )
     )
@@ -127,10 +112,13 @@ function pixelGlitch(directionVector, pixelsToFollow) {
       const index = randInt(bestSolutionsToKeepInEachGenerationAmount, populationSize - 1)
       newGenerationSolutions.push(currentGenerationSolutions[index]);
     }
+    for (var i = 0; i < initialSolutionsToKeepInEachGenerationAmount; i++) {
+      newGenerationSolutions.push(Solution.initializeRandomLocalizedSolution(directionVector, linesPerSolutionAmount, canvasHeight, canvasWidth));
+    }
     // make children between some of the best solutions of the current generation
     while (newGenerationSolutions.length < populationSize) {
-      const index1 = randInt(0, bestSolutionsToKeepInEachGenerationAmount + randomSolutionsToKeepInEachGenerationAmount - 1)
-      const index2 = randInt(0, bestSolutionsToKeepInEachGenerationAmount + randomSolutionsToKeepInEachGenerationAmount - 1)
+      const index1 = randInt(0, totalSolutionsToKeepInEachGenerationAmount - 1)
+      const index2 = randInt(0, totalSolutionsToKeepInEachGenerationAmount - 1)
       const newSol = newGenerationSolutions[index1].makeChild(newGenerationSolutions[index2])
       newSol.mutate(mutationRate, mutationStrengthFactor);
       newGenerationSolutions.push(newSol.clone())
@@ -149,8 +137,8 @@ function pixelGlitch(directionVector, pixelsToFollow) {
 
 
 function setup() {
-  createCanvas(canvas_width, canvas_height);
-  image(img, 0, 0, canvas_width, canvas_height);
+  createCanvas(canvasWidth, canvasHeight);
+  image(img, 0, 0, canvasWidth, canvasHeight);
   colorMode(RGB);
   seed_random_modules()
 

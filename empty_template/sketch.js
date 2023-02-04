@@ -1,8 +1,8 @@
-var canvas_width = 800;
-var canvas_height = 600;
+var canvasWidth = 800;
+var canvasHeight = 600;
 
 
-function seed_random_modules(){
+function seed_random_modules() {
   const random_seed = Math.floor(random(0, 900000));
   const perlin_seed = Math.floor(random(0, 900000));
   randomSeed(random_seed);
@@ -12,7 +12,7 @@ function seed_random_modules(){
 
 
 function setup() {
-  createCanvas(canvas_width, canvas_height);
+  createCanvas(canvasWidth, canvasHeight);
 
   background(0);
   colorMode(RGB);

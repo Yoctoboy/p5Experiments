@@ -3,6 +3,11 @@ function randomExponential(lambda) {
     return -Math.log(randomUniform) / lambda;
 }
 
+function randomExponentialAvg(avg) {
+    var randomUniform = Math.random();
+    return -Math.log(randomUniform) * avg;
+}
+
 function randomInterval(min, max) {
     return Math.random() * (max - min) + min;
 }
@@ -22,10 +27,20 @@ function percentage(partialValue, totalValue, round = 2) {
     return Math.round(((100 * partialValue) / totalValue) * Math.pow(10, round)) / Math.pow(10, round);
 }
 
-function invertPercentage(partialValue, totalValue, round = 1) {
+function invertPercentage(partialValue, totalValue, round = 2) {
     return 100 - (Math.round(((100 * partialValue) / totalValue) * Math.pow(10, round)) / Math.pow(10, round));
 }
 
 function clip(value, min, max) {
     return Math.min(Math.max(min, value), max)
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
 }

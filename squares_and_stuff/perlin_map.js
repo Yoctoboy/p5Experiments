@@ -6,8 +6,8 @@ function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-var canvas_width = 2000;
-var canvas_height = 2000;
+var canvasWidth = 2000;
+var canvasHeight = 2000;
 var density_factor = 0.0015; // the lower, the higher the 'zoom' on the perlin noise map
 // var noise_seed = 1;  // set seed
 var noise_seed = Math.floor(getRandomFloat(0, 1000000));  // random random seed
@@ -17,19 +17,19 @@ noise_module.seed(noise_seed);
 
 function setup() {
   let start_time = Date.now();
-  createCanvas(canvas_width, canvas_height);
+  createCanvas(canvasWidth, canvasHeight);
   background(0);
   colorMode(RGB);
 
   let noise_value;
   let col;
-  for (var i = 0; i < canvas_width; i += 1) {
-    for (var j = 0; j < canvas_height; j += 1) {
+  for (var i = 0; i < canvasWidth; i += 1) {
+    for (var j = 0; j < canvasHeight; j += 1) {
       noise_value = (noise_module.perlin2(density_factor * i, density_factor * j) + 1) / 2; // between 0 and 1
       col = color(255 * noise_value, 255 * noise_value, 255 * noise_value);
       set(i, j, col);
     }
-    // console.log(i, "/", canvas_width);
+    // console.log(i, "/", canvasWidth);
   }
   updatePixels()
   let end_time = Date.now();

@@ -6,8 +6,8 @@ function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-var canvas_width = 1200;
-var canvas_height = 1200;
+var canvasWidth = 1200;
+var canvasHeight = 1200;
 var density_factor = 0.0007; // the lower, the higher the 'zoom' on the perlin noise map
 // var noise_seed = 245755;  // set seed
 var noise_seed = Math.floor(getRandomFloat(0, 1000000));  // random random seed
@@ -26,7 +26,7 @@ function setup() {
   rectangle_color = color(0, 200, 200, 80);
   // background_color = color(180, 255, 255);
   background_color = color(0, 0, 0);
-  createCanvas(canvas_width, canvas_height);
+  createCanvas(canvasWidth, canvasHeight);
   background(background_color);
   colorMode(RGB);
   strokeWeight(1);
@@ -36,20 +36,20 @@ function setup() {
 
   let noise_value, adjusted_noise_value;
   let rectangles_drawn = 0;
-  for (var i = -rectangle_width; i < canvas_width; i += 1) {
-    for (var j = -rectangle_height; j < canvas_height; j += 1) {
+  for (var i = -rectangle_width; i < canvasWidth; i += 1) {
+    for (var j = -rectangle_height; j < canvasHeight; j += 1) {
       noise_value = (noise_module.perlin2(density_factor * i, density_factor * j) + 1) / 2; // between 0 and 1
       adjusted_noise_value = Math.pow(noise_value, 10) * 100;
       if (getRandomFloat(0, 1) < adjusted_noise_value) {
         draw_random_square(i, j);
         rectangles_drawn += 1;
         if (rectangles_drawn % 50000 == 0) {
-          var percentage_done = (((i + rectangle_width) / (canvas_width + rectangle_width)) * 100).toFixed(1);
+          var percentage_done = (((i + rectangle_width) / (canvasWidth + rectangle_width)) * 100).toFixed(1);
           console.log(`${rectangles_drawn} rectangles, approx ${percentage_done}% done`);
         }
       }
     }
-    // console.log(i, "/", canvas_width);
+    // console.log(i, "/", canvasWidth);
   }
   let end_time = Date.now();
   var execution_time = (end_time - start_time) / 1000;
