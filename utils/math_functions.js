@@ -17,6 +17,10 @@ function randInt(min, max) {
     return Math.floor(Math.random() * (max + 1 - min) + min);
 }
 
+function randomAround(value, ratio = 0.5) {
+    return randomInterval(value * ratio, value / ratio);
+}
+
 function get_orthogonal_vector(vector, normalize = true) {
     orthogonal_vector = createVector(1, -vector.x / vector.y);
     if (normalize) orthogonal_vector.normalize();

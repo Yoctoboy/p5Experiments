@@ -6,9 +6,10 @@ export class PixelMatrix {
     }
 
     get(h, w) {
-        if (0 <= h && h < this.height) {
-            if (0 <= w && w < this.width) {
-                return this.mat[h][w];
+        let hint = Math.round(h), wint = Math.round(w);
+        if (0 <= hint && hint < this.height) {
+            if (0 <= wint && wint < this.width) {
+                return this.mat[hint][wint];
             }
         }
         return 0;
