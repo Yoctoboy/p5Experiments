@@ -13,8 +13,14 @@ import {
   maximumShadeMarginToBreakLine,
   minimumPixelShade,
   minimumLineLengthAverage,
-  minimumLineShadeAverage,
-  averageStokeWeight,
+  averageStrokeWeight,
+  linesToSkipRatioAverage,
+  clippingPower,
+  lineBrightnessRandomAdjustmentMargin,
+  minimumLineShade,
+  defineConstants,
+  lineAlpha,
+  maximumLineShade,
 } from './constants.js';
 
 // "yarn serve" at the root of the repo
@@ -33,7 +39,9 @@ function getImagePixels() {
   for (var i = 0; i < canvasHeight; i++) {
     imgPixels[i] = new Array();
     for (var j = 0; j < canvasWidth; j++) {
-      imgPixels[i].push(flatPixels.subarray((i * 4 * canvasWidth) + 4 * j, i * 4 * canvasWidth + 4 * j + 4))
+      imgPixels[i].push(
+        flatPixels.subarray((i * 4 * canvasWidth) + 4 * j, i * 4 * canvasWidth + 4 * j + 4)
+      )
     }
   }
   return imgPixels;
@@ -72,19 +80,28 @@ function blacken() {
   return new PixelMatrix(blackenedPixels);
 }
 
+
 /*
  * Returns true if the current pixel is different enough from precedent pixels
  * to either start or end a line there
- * param shadeSum: number - sum of shades of all pixels in the current line (if any)
+ * param shadeSum: rgb array - sum of shades of all pixels in the current line (if any)
  * param shadeAmount: number - number of pixel shades summed to obtain shadeSum
- * param currentPixelShade: number - shade of current pixel
+ * param currentPixelShade: rgb array - shade of current pixel
  */
-function startOrEndCondition(shadeSum, shadesAmount, currentPixelShade, currentMinimumLineLength = 0) {
+function startOrEndConditionColored(shadeSum, shadesAmount, currentPixelShade, currentMinimumLineLength = 0) {
+  // shadeSum and currentPixelShade are 3-uples (RGB colors from 0 to 255)
+  const averageShade = (currentPixelShade[0] + currentPixelShade[1] + currentPixelShade[2]) / 3
   if (shadesAmount == 0) // no current line
-    return currentPixelShade > minimumPixelShade && Math.random() < 0.95  // condition to start a new line
+    return averageShade > minimumPixelShade //&& Math.random() < 0.95  // condition to start a new line
   else { // return wether we do continue on the current line
     if (shadesAmount < currentMinimumLineLength) return true;
-    if (Math.abs(currentPixelShade - shadeSum) < (shadeSum / shadesAmount) + randInt(0, maximumShadeMarginToBreakLine)) {
+    if (Math.abs(currentPixelShade[0] - shadeSum[0]) < (shadeSum[0] / shadesAmount) + randInt(0, maximumShadeMarginToBreakLine)) {
+      return true;
+    }
+    if (Math.abs(currentPixelShade[1] - shadeSum[1]) < (shadeSum[1] / shadesAmount) + randInt(0, maximumShadeMarginToBreakLine)) {
+      return true;
+    }
+    if (Math.abs(currentPixelShade[2] - shadeSum[2]) < (shadeSum[2] / shadesAmount) + randInt(0, maximumShadeMarginToBreakLine)) {
       return true;
     }
     return false;
@@ -93,53 +110,78 @@ function startOrEndCondition(shadeSum, shadesAmount, currentPixelShade, currentM
 
 
 function drawPure(matrixToFollow) {
-  background(0);
-  // const linesColor = [randInt(50, 255), randInt(0, 160), randInt(80, 255)];
-  const linesColor = [255, 255, 255]
-  for (var height = -500; height < canvasHeight; height += randomAround(averageStokeWeight, 0.8)) {
-    if (Math.random() < 0.2) continue; // skip a line from time to time
+
+
+  const linesColor = [randInt(100, 255), randInt(0, 160), randInt(80, 255)];
+  // const linesColor = [230, 110, 200]
+  // const linesColor = [255, 255, 255]
+  for (var height = -Math.max(canvasHeight, canvasWidth); height < canvasHeight; height += randomAround(averageStrokeWeight, 0.8)) {
+    if (Math.random() < randomAround(linesToSkipRatioAverage, 0.5)) continue; // skip a line from time to time
 
     let curx = 0;
     let cury = height;
     let start = null;
     let end = null;
-    let shadeSum = 0, shadesAmount = 0;
+    let shadeSum = [0, 0, 0], shadesAmount = 0;
     let currentMinimumLineLength;
-    while (curx < canvasWidth) {
-      if (cury < 10) { // avoid border effects at the top of the picture
+    while (curx < canvasWidth && cury < canvasHeight) {
+      if (cury < 2 * forwardOverlapLengthAverage || curx < 2 * backwardOverlapLengthAverage) { // avoid border effects at the top of the picture
         curx += directionVector.x;
         cury += directionVector.y;
         continue;
       };
-      let currentPixelShade = matrixToFollow.get(cury, curx)[0]
-      if (startOrEndCondition(shadeSum, shadesAmount, currentPixelShade, currentMinimumLineLength)) {
+      // console.log(shadeSum)
+      let currentPixelShade = matrixToFollow.get(cury, curx)
+      if (startOrEndConditionColored(shadeSum, shadesAmount, currentPixelShade, currentMinimumLineLength)) {
         if (start == null) {
           currentMinimumLineLength = randomAround(minimumLineLengthAverage);
           start = new Element2D(curx, cury);
         } else {
           end = new Element2D(curx, cury);
         }
-        shadeSum += currentPixelShade;
+        shadeSum = shadeSum.map((currentShadeSum, index) => currentShadeSum + currentPixelShade[index]);
         shadesAmount += 1;
       } else {
         if (end != null) {
           // draw a line between start and end and reset both values
           let lineStart = start.translate(oppositeDirectionVector, randomExponentialAvg(backwardOverlapLengthAverage));
           let lineEnd = end.translate(directionVector, randomExponentialAvg(forwardOverlapLengthAverage));
-          stroke(color([...linesColor, clip(shadeSum / shadesAmount + randInt(-20, 5), minimumLineShadeAverage, 255)]));
-          strokeWeight(randomAround(averageStokeWeight, 0.8))
-          line(lineStart.x, lineStart.y, lineEnd.x, lineEnd.y);
+          let heightRandomOffset = randomInterval(0.5, 0.5);
+          const lineColor = shadeSum.map(shade => shade / shadesAmount)
+          const randomBrightnessAdjustment = randInt(-lineBrightnessRandomAdjustmentMargin, lineBrightnessRandomAdjustmentMargin);
+          stroke(color([...(lineColor.map(shade => poweredClip(shade + randomBrightnessAdjustment, minimumLineShade, maximumLineShade, clippingPower))), lineAlpha]));
+          strokeWeight(randomAround(averageStrokeWeight, 0.8))
+          line(lineStart.x, lineStart.y + heightRandomOffset, lineEnd.x, lineEnd.y + heightRandomOffset);
 
           // reset everything
           start = null;
           end = null;
-          shadeSum = 0;
+          shadeSum = [0, 0, 0];
           shadesAmount = 0;
         }
       }
       curx += directionVector.x;
       cury += directionVector.y;
     }
+  }
+}
+
+class SquareFrame {
+
+  constructor() { }
+
+  drawAll(frameSize, frameColor) {
+    color(frameColor)
+    for (var x = 0; x < canvasWidth; x++) {
+      for (var y = 0; y < frameSize; y++) set(x, y, frameColor);
+      for (var y = canvasHeight - frameSize; y < canvasHeight; y++) set(x, y, frameColor);
+    }
+
+    for (var y = frameSize; y <= canvasHeight - frameSize; y++) {
+      for (var x = 0; x < frameSize; x++) set(x, y, frameColor);
+      for (var x = canvasWidth - frameSize; x < canvasWidth; x++) set(x, y, frameColor);
+    }
+    updatePixels();
   }
 }
 
@@ -150,14 +192,36 @@ function setup() {
   colorMode(RGB);
   seed_random_modules()
 
+
+
   // put setup code here
   redraw()
   noLoop();
+  noSmooth();
   smooth();
 
   // const blackenedPixels = blacken();
   // getImagePixels()
-  drawPure(new PixelMatrix(getImagePixels()));
+
+  background(0);
+  // blendMode(BLEND)
+
+  // blendMode(LIGHTEST) // very bright
+  blendMode(ADD) // default
+  // blendMode(); // do not reset background with this blendMode
+  // blendMode(SOFT_LIGHT) // do not reset background with this blendMode
+  // blendMode(OVERLAY) // do not reset background with this blendMode
+  // blendMode(DODGE) // do not reset background with this blendMode
+
+  const matrixToFollow = getImagePixels()
+  let pass = 1
+  while (pass <= 3) {
+    defineConstants(pass)
+    drawPure(new PixelMatrix(matrixToFollow));
+    pass++;
+  }
+
+  // new SquareFrame().drawAll(260, 255);
 }
 
 

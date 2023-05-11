@@ -12,7 +12,7 @@ export class PixelMatrix {
                 return this.mat[hint][wint];
             }
         }
-        return 0;
+        return [0, 0, 0];
     }
 
 }

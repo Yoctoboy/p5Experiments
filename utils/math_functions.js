@@ -39,6 +39,28 @@ function clip(value, min, max) {
     return Math.min(Math.max(min, value), max)
 }
 
+function poweredClip(value, min, max, power = 2) {
+    return Math.max(
+        Math.min(
+            Math.pow(
+                Math.min(
+                    Math.max(
+                        min,
+                        value
+                    ),
+                    max
+                ),
+                power
+            ) / Math.pow(
+                max,
+                power - 1
+            ),
+            max
+        ),
+        min
+    );
+}
+
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
