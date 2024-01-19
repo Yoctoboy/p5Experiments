@@ -17,6 +17,6 @@
   },
   "devDependencies": {
     "camera-controls": "^2.7.3",
-    "vite": "^5.0.10"
+    "vite": "^5.0.12"
   }
 }
