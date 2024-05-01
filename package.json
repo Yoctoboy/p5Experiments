@@ -1,0 +1,22 @@
+{
+  "name": "p5Experiments",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Yoctoboy/p5Experiments.git",
+  "author": "Yoctoboy <alexis@padam.io>",
+  "license": "MIT",
+  "dependencies": {
+    "esbuild": "^0.17.0",
+    "http-server": "^14.1.1",
+    "lodash.clonedeep": "^4.5.0",
+    "p5": "^1.5.0",
+    "three": "^0.160.0"
+  },
+  "scripts": {
+    "serve": "http-server . -c-1 -p 8080"
+  },
+  "devDependencies": {
+    "camera-controls": "^2.7.3",
+    "vite": "^5.0.10"
+  }
+}
