@@ -24,12 +24,12 @@ import {
 } from './constants.js';
 
 // "yarn serve" at the root of the repo
-// then go to http://127.0.0.1:8080/sorted_face/index.html
+// then go to http://127.0.0.1:8001/sorted_face_pure/index.html
 
 let img;
 
 function preload() {
-  img = loadImage('assets/' + image_name);
+  img = loadImage("assets/" + image_name);
 }
 
 function getImagePixels() {
@@ -47,35 +47,39 @@ function getImagePixels() {
   return imgPixels;
 }
 
-
 function seed_random_modules() {
   const random_seed = Math.floor(random(0, 900000));
   const perlin_seed = Math.floor(random(0, 900000));
   randomSeed(random_seed);
-  noise_module.seed(perlin_seed)
+  noise_module.seed(perlin_seed);
   console.log("Random seed =", random_seed, "/ Perlin seed =", perlin_seed);
 }
 
-
 function blacken() {
   let pix = getImagePixels();
-  let min = 255, max = 0;
-  pix.forEach(line => line.forEach(pixel => min = Math.min(min, pixel[0])));
-  pix.forEach(line => line.forEach(pixel => max = Math.max(max, pixel[0])));
+  let min = 255,
+    max = 0;
+  pix.forEach((line) =>
+    line.forEach((pixel) => (min = Math.min(min, pixel[0])))
+  );
+  pix.forEach((line) =>
+    line.forEach((pixel) => (max = Math.max(max, pixel[0])))
+  );
   // const threshold = (max + min) / 2;
-  const threshold = 95
+  const threshold = 95;
 
-  let blackenedPixels = Array.from(Array(canvasHeight), () => new Array(canvasWidth));
+  let blackenedPixels = Array.from(
+    Array(canvasHeight),
+    () => new Array(canvasWidth)
+  );
   for (var i = 0; i < canvasHeight; i++) {
     for (var j = 0; j < canvasWidth; j++) {
-      if (pix[i][j][0] < threshold)
-        blackenedPixels[i][j] = [0, 0, 0, 0];
-      else
-        blackenedPixels[i][j] = [255, 255, 255, 255];
-      set(j, i, blackenedPixels[i][j][0])
+      if (pix[i][j][0] < threshold) blackenedPixels[i][j] = [0, 0, 0, 0];
+      else blackenedPixels[i][j] = [255, 255, 255, 255];
+      set(j, i, blackenedPixels[i][j][0]);
     }
   }
-  pixels = blackenedPixels
+  pixels = blackenedPixels;
   updatePixels();
   return new PixelMatrix(blackenedPixels);
 }
@@ -107,7 +111,6 @@ function startOrEndConditionColored(shadeSum, shadesAmount, currentPixelShade, c
     return false;
   }
 }
-
 
 function drawPure(matrixToFollow) {
 
@@ -190,12 +193,12 @@ function setup() {
   createCanvas(canvasWidth, canvasHeight);
   image(img, 0, 0, canvasWidth, canvasHeight);
   colorMode(RGB);
-  seed_random_modules()
+  seed_random_modules();
 
 
 
   // put setup code here
-  redraw()
+  redraw();
   noLoop();
   noSmooth();
   smooth();
@@ -224,11 +227,9 @@ function setup() {
   // new SquareFrame().drawAll(260, 255);
 }
 
-
 function draw() {
   // put drawing code here
 }
-
 
 window.draw = draw;
 window.preload = preload;
